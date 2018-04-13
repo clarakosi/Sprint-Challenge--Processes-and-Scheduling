@@ -101,6 +101,27 @@ int main(void)
         #endif
         
         /* Add your code for implementing the shell's logic here */
+        int rc = fork();
+
+        if (rc < 0) {
+            fprintf(stderr, "fork failed\n");
+            exit(1);
+        } else if (rc == 0) {
+            if (strcmp(args[0], "cd") == 0) {
+                if (args_count == 2) {
+                    printf("argument 1: %s\n", args[0]);
+                    int dir = chdir(args[1]);
+                    continue;
+                    if(dir == -1) {
+                        perror("chdir");
+                    }
+                } 
+                printf("Must include a directory after cd\n");
+            } 
+            execvp(args[0], args);
+        } else {
+            int wc = waitpid(rc, NULL, 0);
+        }
         
     }
 
