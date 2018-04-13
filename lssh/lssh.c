@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <fcntl.h>
 
 #define PROMPT "lambda-shell$ "
 
@@ -102,6 +103,19 @@ int main(void)
         
         /* Add your code for implementing the shell's logic here */
         int backgroundProgram = 0;
+        int redirect = 0;
+        char fileName[500];
+        int fd;
+
+        for (int i = 0; i < args_count; i++) {
+            if (strcmp(args[i], ">") == 0) {
+                strcpy(fileName, args[i+1]);
+                redirect = 1;
+                // for (int j = i; j < args_count; j++) {
+                //     args[j] = NULL;
+                // }
+            }
+        }
 
         if (strcmp(args[0], "cd") == 0) {
             if (args_count == 2) {
@@ -117,8 +131,8 @@ int main(void)
         if (strcmp(args[args_count-1], "&") == 0) {
             args[args_count-1] = NULL;
             backgroundProgram = 1;
-            // continue;
         }
+
 
         int rc = fork();
 
@@ -126,6 +140,11 @@ int main(void)
             fprintf(stderr, "fork failed\n");
             exit(1);
         } else if (rc == 0) {
+            if (redirect) {
+                fd = open(fileName, O_RDWR);
+                dup2(fd, 1);
+                continue;
+            }
             execvp(args[0], args);
         } else {
             if (backgroundProgram) {
